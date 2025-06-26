@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { createClient } from '@/lib/supabase'
 import { Loader2 } from 'lucide-react'
 
@@ -13,23 +14,32 @@ export default function SocialLoginButtons({
 }: SocialLoginButtonsProps) {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [githubLoading, setGithubLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
+    setError('')
+
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       })
 
       if (error) {
         console.error('Google 로그인 오류:', error)
+        setError(`Google 로그인 실패: ${error.message}`)
       }
     } catch (err) {
       console.error('Google 로그인 중 오류:', err)
+      setError('Google 로그인 중 오류가 발생했습니다')
     } finally {
       setGoogleLoading(false)
     }
@@ -37,6 +47,8 @@ export default function SocialLoginButtons({
 
   const handleGithubLogin = async () => {
     setGithubLoading(true)
+    setError('')
+
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -48,9 +60,11 @@ export default function SocialLoginButtons({
 
       if (error) {
         console.error('GitHub 로그인 오류:', error)
+        setError(`GitHub 로그인 실패: ${error.message}`)
       }
     } catch (err) {
       console.error('GitHub 로그인 중 오류:', err)
+      setError('GitHub 로그인 중 오류가 발생했습니다')
     } finally {
       setGithubLoading(false)
     }
@@ -58,6 +72,12 @@ export default function SocialLoginButtons({
 
   return (
     <div className="space-y-3">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription className="text-xs">{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />

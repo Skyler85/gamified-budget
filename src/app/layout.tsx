@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
+import { OnboardingProvider } from '@/lib/onboarding-context'
+import OnboardingModal from '@/components/onboarding/OnboardingModal'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,7 +20,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <OnboardingProvider>
+            {children}
+            <OnboardingModal />
+          </OnboardingProvider>
+        </AuthProvider>
       </body>
     </html>
   )
