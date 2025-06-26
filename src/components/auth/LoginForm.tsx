@@ -18,6 +18,8 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import ForgotPasswordForm from './ForgotPasswordForm'
+import SocialLoginButtons from './SocialLoginButtons'
 
 const loginSchema = z.object({
   email: z.string().email('올바른 이메일을 입력해주세요'),
@@ -30,8 +32,8 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   const {
     register,
@@ -46,6 +48,7 @@ export default function LoginForm() {
     setError('')
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -68,6 +71,11 @@ export default function LoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // 비밀번호 재설정 폼 표시
+  if (showForgotPassword) {
+    return <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
   }
 
   return (
@@ -129,6 +137,9 @@ export default function LoginForm() {
               <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
           </div>
+
+          {/* 소셜 로그인 버튼들 */}
+          <SocialLoginButtons disabled={isLoading} />
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
@@ -143,16 +154,28 @@ export default function LoginForm() {
             )}
           </Button>
 
-          <div className="text-center text-sm">
-            <span className="text-gray-600">계정이 없으신가요? </span>
-            <Button
-              variant="link"
-              className="p-0 h-auto font-normal"
-              onClick={() => router.push('/signup')}
-              disabled={isLoading}
-            >
-              회원가입
-            </Button>
+          <div className="text-center text-sm space-y-2">
+            <div>
+              <span className="text-gray-600">계정이 없으신가요? </span>
+              <Button
+                variant="link"
+                className="p-0 h-auto font-normal"
+                onClick={() => router.push('/signup')}
+                disabled={isLoading}
+              >
+                회원가입
+              </Button>
+            </div>
+            <div>
+              <Button
+                variant="link"
+                className="p-0 h-auto font-normal text-sm"
+                onClick={() => setShowForgotPassword(true)}
+                disabled={isLoading}
+              >
+                비밀번호를 잊으셨나요?
+              </Button>
+            </div>
           </div>
         </CardFooter>
       </form>
