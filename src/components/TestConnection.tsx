@@ -47,9 +47,7 @@ export default function TestConnection() {
                 기본 데이터: {results.defaultData?.badges ? '✅' : '❌'}
               </div>
               <div>보안 정책: {results.security?.length > 0 ? '✅' : '❌'}</div>
-              <div>
-                인증 시스템: {results.authentication?.success ? '✅' : '❌'}
-              </div>
+              <div>인증 시스템: {results.authentication ? '✅' : '❌'}</div>
               <div className="font-bold pt-2 border-t">
                 전체 결과: {results.overall ? '✅ 성공' : '❌ 실패'}
               </div>

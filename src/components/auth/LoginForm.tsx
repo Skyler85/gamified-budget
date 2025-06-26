@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 const loginSchema = z.object({
   email: z.string().email('올바른 이메일을 입력해주세요'),
@@ -31,6 +31,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const supabase = createClient()
 
   const {
     register,

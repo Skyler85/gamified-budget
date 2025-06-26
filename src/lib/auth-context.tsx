@@ -1,7 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from './supabase'
+import { createClient } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
@@ -28,7 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return
 
     try {
-      const { data, error } = await supabase
+      const client = createClient()
+      const { data, error } = await client
         .from('profiles')
         .select('*')
         .eq('id', user.id)
@@ -48,9 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 현재 세션 확인
     const getSession = async () => {
+      const client = createClient()
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await client.auth.getSession()
       setUser(session?.user ?? null)
 
       if (session?.user) {
@@ -63,9 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession()
 
     // 인증 상태 변화 감지
+    const client = createClient()
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = client.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id)
       setUser(session?.user ?? null)
 
       if (session?.user) {
@@ -78,10 +82,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
+  }, [])
+
+  // refreshProfile 함수를 user.id 변경 시에만 업데이트되도록 수정
+  useEffect(() => {
+    if (user) {
+      refreshProfile()
+    }
   }, [user?.id])
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
+    const client = createClient()
+    const { error } = await client.auth.signOut()
     if (error) {
       console.error('로그아웃 오류:', error)
     }

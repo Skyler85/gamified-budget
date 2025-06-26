@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 const signupSchema = z
   .object({
@@ -46,6 +46,8 @@ export default function SignupForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+
+  const supabase = createClient()
 
   const {
     register,

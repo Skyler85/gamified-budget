@@ -4,6 +4,7 @@ import {
 } from './test-connection'
 import { testTableStructure, testDefaultData } from './test-database'
 import { testAnonymousAccess, testUserSignup } from './test-auth'
+import { testStoragePermissions } from './test-storage'
 
 export async function runAllTests() {
   console.log('🧪 Supabase 전체 연결 테스트 시작...')
@@ -16,6 +17,7 @@ export async function runAllTests() {
     defaultData: null,
     security: null,
     authentication: null,
+    storage: null,
     overall: false,
   }
 
@@ -55,6 +57,11 @@ export async function runAllTests() {
     console.log('-'.repeat(30))
     results.authentication = await testUserSignup()
 
+    // 7. 스토리지 테스트
+    console.log('\n7️⃣ 스토리지 테스트')
+    console.log('-'.repeat(30))
+    results.storage = await testStoragePermissions()
+
     // 전체 결과 평가
     const allSuccessful =
       results.environment.urlExists &&
@@ -63,7 +70,8 @@ export async function runAllTests() {
       results.tables.every(t => t.success) &&
       results.defaultData.badges &&
       results.security.length > 0 &&
-      results.authentication.success
+      results.authentication.success &&
+      results.storage
 
     results.overall = allSuccessful
 
@@ -80,6 +88,7 @@ export async function runAllTests() {
     console.log(`기본 데이터: ${results.defaultData.badges ? '✅' : '❌'}`)
     console.log(`보안 정책: ${results.security.length > 0 ? '✅' : '❌'}`)
     console.log(`인증 시스템: ${results.authentication.success ? '✅' : '❌'}`)
+    console.log(`스토리지 권한: ${results.storage ? '✅' : '❌'}`)
     console.log(
       `\n🎯 전체 결과: ${allSuccessful ? '✅ 모든 테스트 통과!' : '❌ 일부 테스트 실패'}`
     )

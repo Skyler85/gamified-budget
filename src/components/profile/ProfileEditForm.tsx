@@ -96,15 +96,28 @@ export default function ProfileEditForm({
     setUploadingAvatar(true)
     try {
       const fileExt = avatarFile.name.split('.').pop()
-      const fileName = `${profile.id}-${Date.now()}.${fileExt}`
+      const fileName = `${profile.id}/${Date.now()}.${fileExt}`
 
-      const { error: uploadError } = await supabase.storage
+      // 기존 파일이 있다면 삭제 (선택사항)
+      if (profile.avatar_url) {
+        const oldFileName = profile.avatar_url.split('/').pop()
+        if (oldFileName) {
+          await supabase.storage
+            .from('avatars')
+            .remove([`${profile.id}/${oldFileName}`])
+        }
+      }
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, avatarFile)
+        .upload(fileName, avatarFile, {
+          cacheControl: '3600',
+          upsert: true,
+        })
 
       if (uploadError) {
         console.error('아바타 업로드 오류:', uploadError)
-        setError('아바타 업로드에 실패했습니다')
+        setError(`아바타 업로드에 실패했습니다: ${uploadError.message}`)
         return null
       }
 
