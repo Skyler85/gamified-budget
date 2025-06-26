@@ -80,8 +80,17 @@ export default function DashboardPage() {
     setLoading(true)
     const supabase = createClient()
 
+    // 월의 마지막 날을 구하는 함수
+    const getLastDayOfMonth = (year, month) => {
+      return new Date(year, month, 0).getDate()
+    }
+
     try {
       // 현재 월 거래 데이터
+      const lastDayOfCurrentMonth = getLastDayOfMonth(
+        currentYear,
+        currentMonthNum
+      )
       const { data: currentMonthTransactions, error: transactionsError } =
         await supabase
           .from('transactions')
@@ -101,7 +110,7 @@ export default function DashboardPage() {
           )
           .lte(
             'date',
-            `${currentYear}-${currentMonthNum.toString().padStart(2, '0')}-31`
+            `${currentYear}-${currentMonthNum.toString().padStart(2, '0')}-${lastDayOfCurrentMonth.toString().padStart(2, '0')}`
           )
 
       if (transactionsError) {
@@ -118,7 +127,10 @@ export default function DashboardPage() {
         .select('*')
         .eq('user_id', profile.id)
         .gte('date', `${prevYear}-${prevMonth.toString().padStart(2, '0')}-01`)
-        .lte('date', `${prevYear}-${prevMonth.toString().padStart(2, '0')}-31`)
+        .lte(
+          'date',
+          `${prevYear}-${prevMonth.toString().padStart(2, '0')}-${lastDayOfCurrentMonth.toString().padStart(2, '0')}`
+        )
 
       // 최근 거래 내역 (10개)
       const { data: recentTransactions } = await supabase
@@ -228,6 +240,72 @@ export default function DashboardPage() {
     )
   }
 
+  // 대시보드에서 콘솔을 열고 실행
+  // const debugDashboardData = async () => {
+  //   console.log('=== 대시보드 데이터 디버깅 ===')
+
+  //   // 현재 사용자 확인
+  //   const supabase = createClient()
+
+  //   const {
+  //     data: { user },
+  //   } = await supabase.auth.getUser()
+  //   console.log('현재 사용자:', user?.id)
+
+  //   if (!user) {
+  //     console.log('❌ 로그인되지 않음')
+  //     return
+  //   }
+
+  //   // 모든 거래 확인
+  //   const { data: allTransactions } = await supabase
+  //     .from('transactions')
+  //     .select('*')
+  //     .eq('user_id', user.id)
+  //     .order('date', { ascending: false })
+
+  //   console.log('전체 거래 내역:', allTransactions)
+
+  //   // 이번 달 거래 확인
+  //   const now = new Date()
+  //   const currentYear = now.getFullYear()
+  //   const currentMonth = now.getMonth() + 1
+  //   const startDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`
+  //   const endDate = new Date(currentYear, currentMonth, 0)
+  //     .toISOString()
+  //     .split('T')[0]
+
+  //   console.log('현재 월 필터:', { startDate, endDate })
+
+  //   const { data: thisMonthTransactions } = await supabase
+  //     .from('transactions')
+  //     .select('*')
+  //     .eq('user_id', user.id)
+  //     .gte('date', startDate)
+  //     .lte('date', endDate)
+
+  //   console.log('이번 달 거래:', thisMonthTransactions)
+
+  //   // 통계 계산
+  //   const income =
+  //     thisMonthTransactions
+  //       ?.filter(t => t.type === 'income')
+  //       .reduce((sum, t) => sum + t.amount, 0) || 0
+  //   const expense =
+  //     thisMonthTransactions
+  //       ?.filter(t => t.type === 'expense')
+  //       .reduce((sum, t) => sum + t.amount, 0) || 0
+
+  //   console.log('계산된 통계:', {
+  //     수입: income,
+  //     지출: expense,
+  //     순수입: income - expense,
+  //     거래건수: thisMonthTransactions?.length || 0,
+  //   })
+  // }
+
+  // debugDashboardData()
+
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* 헤더 */}
@@ -257,6 +335,7 @@ export default function DashboardPage() {
       <MonthlyOverview
         stats={dashboardData.monthlyStats}
         currentMonth={currentMonth}
+        key={`monthly-${dashboardData.monthlyStats.totalIncome}-${dashboardData.monthlyStats.totalExpense}`}
       />
 
       {/* 게임 통계 */}

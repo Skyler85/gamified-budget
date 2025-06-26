@@ -132,12 +132,18 @@ export default function TransactionsPage() {
       query = query.eq('type', selectedType)
     }
 
+    // 월의 마지막 날을 구하는 함수
+    const getLastDayOfMonth = (year: string, month: string) => {
+      return new Date(year, month, 0).getDate()
+    }
+
     // 월별 필터
     if (selectedMonth) {
       const year = selectedMonth.split('-')[0]
       const month = selectedMonth.split('-')[1]
+      const lastDayOfCurrentMonth = getLastDayOfMonth(year, month)
       const startDate = `${year}-${month}-01`
-      const endDate = `${year}-${month}-31`
+      const endDate = `${year}-${month}-${lastDayOfCurrentMonth.toString().padStart(2, '0')}`
       query = query.gte('date', startDate).lte('date', endDate)
     }
 
