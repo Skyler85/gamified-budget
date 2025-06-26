@@ -167,7 +167,14 @@ export default function BudgetProgress({
         {savingGoal > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-gray-700">저축 목표 달성률</h4>
+              <div className="space-y-1">
+                <h4 className="font-semibold text-gray-700">
+                  저축 목표 달성률
+                </h4>
+                <p className="text-xs text-gray-500">
+                  이번 달 수입에서 지출을 뺀 금액 기준
+                </p>
+              </div>
               <savingStatus.icon className={`h-4 w-4 ${savingStatus.color}`} />
             </div>
 
@@ -178,8 +185,16 @@ export default function BudgetProgress({
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">
-                {actualSaving > 0 ? formatCurrency(actualSaving) : '₩0'} /{' '}
-                {formatCurrency(savingGoal)}
+                {actualSaving > 0 ? (
+                  <span className="text-green-600">
+                    실제 저축: {formatCurrency(actualSaving)}
+                  </span>
+                ) : (
+                  <span className="text-red-600">
+                    적자: {formatCurrency(Math.abs(actualSaving))}
+                  </span>
+                )}{' '}
+                / {formatCurrency(savingGoal)}
               </span>
               <span className={`font-medium ${savingStatus.color}`}>
                 {Math.max(0, savingProgress).toFixed(1)}%
@@ -190,6 +205,7 @@ export default function BudgetProgress({
               {savingStatus.message}
             </div>
 
+            {/* 저축 상태별 메시지 */}
             {actualSaving >= savingGoal ? (
               <div className="bg-green-50 p-3 rounded-lg">
                 <p className="text-sm text-green-700">
@@ -202,19 +218,57 @@ export default function BudgetProgress({
             ) : actualSaving > 0 ? (
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  🎯 목표까지:{' '}
+                  🎯 목표까지 남은 금액:{' '}
                   <span className="font-semibold">
                     {formatCurrency(savingGoal - actualSaving)}
                   </span>
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  지출을 {formatCurrency(savingGoal - actualSaving)} 줄이면 목표
+                  달성!
                 </p>
               </div>
             ) : (
               <div className="bg-yellow-50 p-3 rounded-lg">
                 <p className="text-sm text-yellow-700">
-                  💡 지출을 줄여서 저축을 시작해보세요
+                  💡 현재 적자 상태입니다. 지출을 줄이거나 수입을 늘려보세요.
+                </p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  저축하려면 최소{' '}
+                  {formatCurrency(Math.abs(actualSaving) + savingGoal)}을
+                  절약해야 합니다.
                 </p>
               </div>
             )}
+
+            {/* 저축 계산 방법 설명 */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <h5 className="text-xs font-semibold text-gray-700 mb-1">
+                📊 저축 계산 방법
+              </h5>
+              <div className="text-xs text-gray-600 space-y-1">
+                <div>• 실제 저축 = 이번 달 수입 - 이번 달 지출</div>
+                <div>• 달성률 = (실제 저축 ÷ 저축 목표) × 100%</div>
+                <div className="pt-1 border-t border-gray-200">
+                  <span className="text-green-600">
+                    수입: {formatCurrency(totalIncome)}
+                  </span>
+                  <span className="mx-2">-</span>
+                  <span className="text-red-600">
+                    지출: {formatCurrency(totalExpense)}
+                  </span>
+                  <span className="mx-2">=</span>
+                  <span
+                    className={
+                      actualSaving >= 0 ? 'text-green-600' : 'text-red-600'
+                    }
+                  >
+                    {actualSaving >= 0 ? '저축' : '적자'}:{' '}
+                    {formatCurrency(Math.abs(actualSaving))}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
