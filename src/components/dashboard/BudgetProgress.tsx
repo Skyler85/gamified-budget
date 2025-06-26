@@ -4,13 +4,13 @@ import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Target, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
 
 interface BudgetProgressProps {
   monthlyBudget: number
   totalExpense: number
   savingGoal: number
   totalIncome: number
+  onOpenBudgetSettings?: () => void
 }
 
 export default function BudgetProgress({
@@ -18,9 +18,8 @@ export default function BudgetProgress({
   totalExpense,
   savingGoal,
   totalIncome,
+  onOpenBudgetSettings,
 }: BudgetProgressProps) {
-  const router = useRouter()
-
   const budgetUsagePercent =
     monthlyBudget > 0 ? (totalExpense / monthlyBudget) * 100 : 0
   const remainingBudget = monthlyBudget - totalExpense
@@ -100,9 +99,7 @@ export default function BudgetProgress({
               월별 예산과 저축 목표를 설정하면
               <br />더 체계적으로 관리할 수 있어요
             </p>
-            <Button onClick={() => router.push('/profile')}>
-              예산 설정하기
-            </Button>
+            <Button onClick={onOpenBudgetSettings}>예산 설정하기</Button>
           </div>
         </CardContent>
       </Card>
@@ -226,7 +223,7 @@ export default function BudgetProgress({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push('/profile')}
+            onClick={onOpenBudgetSettings}
             className="w-full"
           >
             예산 목표 수정하기

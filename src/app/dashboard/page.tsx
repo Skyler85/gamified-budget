@@ -12,6 +12,7 @@ import GameStats from '@/components/dashboard/GameStats'
 import QuickActions from '@/components/dashboard/QuickActions'
 import TransactionModal from '@/components/transactions/TransactionModal'
 import { PlusCircle, TrendingUp, Wallet, Target } from 'lucide-react'
+import BudgetSettingsModal from '../../components/budget/BudgetSettingsModal'
 
 interface DashboardData {
   monthlyStats: {
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const { profile } = useAuth()
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showBudgetModal, setShowBudgetModal] = useState(false)
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     monthlyStats: {
       totalIncome: 0,
@@ -199,8 +201,8 @@ export default function DashboardPage() {
     }
   }
 
-  const handleTransactionAdded = () => {
-    loadDashboardData()
+  const handleTransactionAdded = async () => {
+    await loadDashboardData()
     setShowAddModal(false)
   }
 
@@ -277,6 +279,7 @@ export default function DashboardPage() {
           totalExpense={dashboardData.monthlyStats.totalExpense}
           savingGoal={profile?.saving_goal || 0}
           totalIncome={dashboardData.monthlyStats.totalIncome}
+          onOpenBudgetSettings={() => setShowBudgetModal(true)}
         />
       </div>
 
@@ -292,6 +295,16 @@ export default function DashboardPage() {
         onClose={() => setShowAddModal(false)}
         onSaved={handleTransactionAdded}
         categories={dashboardData.categories}
+      />
+
+      {/* 예산 설정 모달 */}
+      <BudgetSettingsModal
+        isOpen={showBudgetModal}
+        onClose={() => setShowBudgetModal(false)}
+        onSaved={async () => {
+          await loadDashboardData()
+          setShowBudgetModal(false)
+        }}
       />
     </div>
   )
