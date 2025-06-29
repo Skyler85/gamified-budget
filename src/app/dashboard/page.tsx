@@ -13,6 +13,8 @@ import QuickActions from '@/components/dashboard/QuickActions'
 import TransactionModal from '@/components/transactions/TransactionModal'
 import { PlusCircle, TrendingUp, Wallet, Target } from 'lucide-react'
 import BudgetSettingsModal from '../../components/budget/BudgetSettingsModal'
+import CategoryBudgetProgress from '@/components/dashboard/CategoryBudgetProgress'
+import BudgetAlerts from '@/components/dashboard/BudgetAlerts'
 
 interface DashboardData {
   monthlyStats: {
@@ -331,6 +333,9 @@ export default function DashboardPage() {
         </Button>
       </div>
 
+      {/* 예산 초과 알림 설정 */}
+      <BudgetAlerts />
+
       {/* 월별 개요 */}
       <MonthlyOverview
         stats={dashboardData.monthlyStats}
@@ -361,6 +366,9 @@ export default function DashboardPage() {
           onOpenBudgetSettings={() => setShowBudgetModal(true)}
         />
       </div>
+
+      {/* 카테고리별 예산 진행률 */}
+      <CategoryBudgetProgress />
 
       {/* 최근 거래 내역 */}
       <RecentTransactions
