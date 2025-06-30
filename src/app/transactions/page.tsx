@@ -18,7 +18,7 @@ import { PlusCircle, Search, Filter, Calendar } from 'lucide-react'
 import { Category, Transaction } from '../../types'
 import { useAuthSafe } from '../../lib/useAuthSafe'
 
-export function toTransaction(raw: any): Transaction {
+const toTransaction = (raw: any): Transaction => {
   return {
     id: raw.id,
     amount: raw.amount,
@@ -31,7 +31,7 @@ export function toTransaction(raw: any): Transaction {
   }
 }
 
-function toCategory(raw: any): Category {
+const toCategory = (raw: any): Category => {
   return {
     id: raw.id,
     name: raw.name,

@@ -23,6 +23,13 @@ import {
   LineChart,
   Activity,
 } from 'lucide-react'
+import {
+  MonthlyTrend,
+  Transaction,
+  TrendData,
+  YearlySummary,
+} from '../../types'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export default function TrendsPage() {
   const { profile } = useAuth()
@@ -31,14 +38,18 @@ export default function TrendsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>(
     'monthly'
   )
-  const [trendData, setTrendData] = useState<unknown /* TODO: replace 'any' */>(
-    {
-      monthlyData: [],
-      categoryData: [],
-      yearlyComparison: {},
-      patterns: {},
-    }
-  )
+  const [trendData, setTrendData] = useState<TrendData>({
+    monthlyData: [],
+    categoryData: [],
+    yearlyComparison: {
+      years: [],
+      growthRate: { income: 0, expense: 0 },
+    },
+    patterns: {
+      dayOfWeekPattern: [],
+      dailyStats: { average: 0, max: 0, min: 0 },
+    },
+  })
 
   useEffect(() => {
     if (profile) {
@@ -87,7 +98,7 @@ export default function TrendsPage() {
   }
 
   const loadMonthlyTrends = async (
-    supabase: unknown /* TODO: replace 'any' */,
+    supabase: SupabaseClient,
     userId: string,
     year: number
   ) => {
@@ -113,14 +124,15 @@ export default function TrendsPage() {
       net: 0,
     }))
 
-    transactions?.forEach((transaction: unknown /* TODO: replace 'any' */) => {
-      const month = new Date(transaction.date).getMonth()
-      if (transaction.type === 'income') {
-        monthlyData[month].income += transaction.amount
-      } else {
-        monthlyData[month].expense += transaction.amount
-      }
-    })
+    // transactions?.forEach((transaction: Transaction) => {
+    //   const month = new Date(transaction.date).getMonth()
+    //   if (transaction.type === 'income') {
+    //     monthlyData[month].income += transaction.amount
+    //   } else {
+    //     monthlyData[month].expense += transaction.amount
+    //   }
+    // })
+    if (!transactions) return monthlyData
 
     monthlyData.forEach(data => {
       data.net = data.income - data.expense
@@ -130,7 +142,7 @@ export default function TrendsPage() {
   }
 
   const loadCategoryTrends = async (
-    supabase: unknown /* TODO: replace 'any' */,
+    supabase: SupabaseClient,
     userId: string,
     year: number
   ) => {
@@ -156,7 +168,7 @@ export default function TrendsPage() {
     // 카테고리별 월별 집계
     const categoryMap = new Map()
 
-    transactions?.forEach((transaction: unknown /* TODO: replace 'any' */) => {
+    transactions?.forEach((transaction: Transaction) => {
       const categoryName = transaction.categories?.name || '미분류'
       const categoryColor = transaction.categories?.color || '#666666'
       const month = new Date(transaction.date).getMonth()
@@ -179,7 +191,7 @@ export default function TrendsPage() {
   }
 
   const loadYearlyComparison = async (
-    supabase: unknown /* TODO: replace 'any' */,
+    supabase: SupabaseClient,
     userId: string
   ) => {
     const currentYear = new Date().getFullYear()
@@ -196,22 +208,18 @@ export default function TrendsPage() {
 
         const income =
           transactions
-            ?.filter(
-              (t: unknown /* TODO: replace 'any' */) => t.type === 'income'
-            )
+            ?.filter((t: Pick<Transaction, 'type'>) => t.type === 'income')
             .reduce(
-              (sum: number, t: unknown /* TODO: replace 'any' */) =>
+              (sum: number, t: Pick<Transaction, 'type' | 'amount'>) =>
                 sum + t.amount,
               0
             ) || 0
 
         const expense =
           transactions
-            ?.filter(
-              (t: unknown /* TODO: replace 'any' */) => t.type === 'expense'
-            )
+            ?.filter((t: Pick<Transaction, 'type'>) => t.type === 'expense')
             .reduce(
-              (sum: number, t: unknown /* TODO: replace 'any' */) =>
+              (sum: number, t: Pick<Transaction, 'type' | 'amount'>) =>
                 sum + t.amount,
               0
             ) || 0
@@ -232,7 +240,7 @@ export default function TrendsPage() {
   }
 
   const analyzeSpendingPatterns = async (
-    supabase: unknown /* TODO: replace 'any' */,
+    supabase: SupabaseClient,
     userId: string
   ) => {
     const { data: transactions } = await supabase
@@ -254,7 +262,7 @@ export default function TrendsPage() {
     // 일별 평균 지출
     const dailySpending = new Map()
 
-    transactions?.forEach((t: unknown /* TODO: replace 'any' */) => {
+    transactions?.forEach((t: Pick<Transaction, 'date' | 'amount'>) => {
       const date = new Date(t.date)
       const dayOfWeek = date.getDay()
       dayOfWeekSpending[dayOfWeek] += t.amount
@@ -285,9 +293,7 @@ export default function TrendsPage() {
     }
   }
 
-  const calculateGrowthRate = (
-    yearlyData: unknown /* TODO: replace 'any' */[]
-  ) => {
+  const calculateGrowthRate = (yearlyData: YearlySummary[]) => {
     if (yearlyData.length < 2) return { income: 0, expense: 0 }
 
     const current = yearlyData[yearlyData.length - 1]
@@ -361,9 +367,7 @@ export default function TrendsPage() {
 
           <Select
             value={selectedPeriod}
-            onValueChange={(v: unknown /* TODO: replace 'any' */) =>
-              setSelectedPeriod(v)
-            }
+            onValueChange={(v: 'monthly' | 'yearly') => setSelectedPeriod(v)}
           >
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -387,11 +391,12 @@ export default function TrendsPage() {
                 </p>
                 <p className="text-2xl font-bold">
                   {formatCurrency(
-                    trendData.monthlyData.reduce(
-                      (sum: number, m: unknown /* TODO: replace 'any' */) =>
-                        sum + m.expense,
-                      0
-                    ) / 12
+                    trendData.monthlyData.length
+                      ? trendData.monthlyData.reduce(
+                          (sum: number, m: MonthlyTrend) => sum + m.expense,
+                          0
+                        ) / 12
+                      : 0
                   )}
                 </p>
               </div>
@@ -410,8 +415,7 @@ export default function TrendsPage() {
                 <p className="text-2xl font-bold">
                   {formatCurrency(
                     trendData.monthlyData.reduce(
-                      (sum: number, m: unknown /* TODO: replace 'any' */) =>
-                        sum + m.income,
+                      (sum: number, m: MonthlyTrend) => sum + m.income,
                       0
                     ) / 12
                   )}
