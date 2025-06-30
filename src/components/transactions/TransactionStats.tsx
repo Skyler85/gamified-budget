@@ -2,12 +2,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react'
-
-interface Transaction {
-  amount: number
-  type: 'income' | 'expense'
-  date: string
-}
+import { Transaction } from '../../types'
 
 interface TransactionStatsProps {
   transactions: Transaction[]

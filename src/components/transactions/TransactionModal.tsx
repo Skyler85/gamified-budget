@@ -24,6 +24,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase'
 import { Calculator, Calendar, Tag, Loader2 } from 'lucide-react'
+import { Category, Transaction } from '../../types'
 
 const transactionSchema = z.object({
   amount: z.string().min(1, '금액을 입력해주세요'),
@@ -34,22 +35,6 @@ const transactionSchema = z.object({
 })
 
 type TransactionForm = z.infer<typeof transactionSchema>
-
-interface Category {
-  id: string
-  name: string
-  color: string
-  type: 'income' | 'expense'
-}
-
-interface Transaction {
-  id: string
-  amount: number
-  description: string | null
-  type: 'income' | 'expense'
-  date: string
-  category_id: string
-}
 
 interface TransactionModalProps {
   isOpen: boolean
@@ -94,7 +79,7 @@ export default function TransactionModal({
   useEffect(() => {
     if (editingTransaction) {
       setValue('amount', editingTransaction.amount.toString())
-      setValue('categoryId', editingTransaction.category_id)
+      setValue('categoryId', editingTransaction.categories.id)
       setValue('description', editingTransaction.description || '')
       setValue('type', editingTransaction.type)
       setValue('date', editingTransaction.date)
@@ -135,7 +120,7 @@ export default function TransactionModal({
   }
 
   const onSubmit = async (data: TransactionForm) => {
-    if (!profile) return
+    if (!profile || typeof profile !== 'object' || !('id' in profile)) return
 
     setIsLoading(true)
     setError('')

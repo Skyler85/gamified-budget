@@ -3,21 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Edit2, Trash2, Calendar, Tag } from 'lucide-react'
-
-interface Transaction {
-  id: string
-  amount: number
-  description: string | null
-  type: 'income' | 'expense'
-  date: string
-  created_at: string
-  categories: {
-    id: string
-    name: string
-    color: string
-    icon: string
-  }
-}
+import { Transaction } from '../../types'
 
 interface TransactionListProps {
   transactions: Transaction[]

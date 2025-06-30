@@ -14,13 +14,7 @@ import { useOnboarding } from '@/lib/onboarding-context'
 import { useAuth } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase'
 import { PlusCircle, Coins, Star } from 'lucide-react'
-
-interface Category {
-  id: string
-  name: string
-  color: string
-  type: 'income' | 'expense'
-}
+import { Category } from '@/types'
 
 export default function FirstTransactionStep() {
   const { nextStep, prevStep, currentStep, totalSteps } = useOnboarding()

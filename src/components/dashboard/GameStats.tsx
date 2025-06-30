@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress'
 import { Crown, Coins, Flame, Star, Trophy, Target } from 'lucide-react'
 
 interface GameStatsProps {
-  profile: any
+  profile: unknown /* TODO: replace 'any' */
 }
 
 export default function GameStats({ profile }: GameStatsProps) {

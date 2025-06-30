@@ -23,7 +23,7 @@ interface CategoryChartProps {
 }
 
 export default function CategoryChart({ data, loading }: CategoryChartProps) {
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: unknown /* TODO: replace 'any' */) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (

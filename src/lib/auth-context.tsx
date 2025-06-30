@@ -2,26 +2,21 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase'
+import type { UserProfile } from '@/types'
 
 interface AuthContextType {
   user: User | null
-  profile: any | null
+  profile: UserProfile | null
   loading: boolean
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  profile: null,
-  loading: true,
-  signOut: async () => {},
-  refreshProfile: async () => {},
-})
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<any | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
   const refreshProfile = async () => {
@@ -40,31 +35,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      setProfile(data)
+      setProfile(data as UserProfile) // ✅ 타입 단언
     } catch (err) {
       console.error('프로필 새로고침 오류:', err)
     }
   }
 
   useEffect(() => {
-    // 현재 세션 확인
     const getSession = async () => {
       const client = createClient()
       const {
         data: { session },
       } = await client.auth.getSession()
+
       setUser(session?.user ?? null)
-
-      if (session?.user) {
-        await refreshProfile()
-      }
-
+      if (session?.user) await refreshProfile()
       setLoading(false)
     }
 
     getSession()
 
-    // 인증 상태 변화 감지
     const client = createClient()
     const {
       data: { subscription },
@@ -84,9 +74,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // refreshProfile 함수를 user.id 변경 시에만 업데이트되도록 수정
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       refreshProfile()
     }
   }, [user?.id])

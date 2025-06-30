@@ -10,38 +10,40 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase'
-import { formatCurrency } from '@/lib/utils'
 import TransactionList from '@/components/transactions/TransactionList'
 import TransactionModal from '@/components/transactions/TransactionModal'
 import TransactionStats from '@/components/transactions/TransactionStats'
 import { PlusCircle, Search, Filter, Calendar } from 'lucide-react'
+import { Category, Transaction } from '../../types'
+import { useAuthSafe } from '../../lib/useAuthSafe'
 
-interface Transaction {
-  id: string
-  amount: number
-  description: string | null
-  type: 'income' | 'expense'
-  date: string
-  created_at: string
-  categories: {
-    id: string
-    name: string
-    color: string
-    icon: string
+export function toTransaction(raw: any): Transaction {
+  return {
+    id: raw.id,
+    amount: raw.amount,
+    description: raw.description,
+    type: raw.type as 'income' | 'expense',
+    date: raw.date,
+    created_at: raw.created_at,
+    category_id: raw.category_id ?? undefined,
+    categories: raw.categories ?? undefined, // null → undefined 처리
   }
 }
 
-interface Category {
-  id: string
-  name: string
-  color: string
-  type: 'income' | 'expense'
+function toCategory(raw: any): Category {
+  return {
+    id: raw.id,
+    name: raw.name,
+    color: raw.color,
+    icon: raw.icon ?? '',
+    type: raw.type as 'income' | 'expense',
+    is_default: raw.is_default ?? false,
+  }
 }
 
 export default function TransactionsPage() {
-  const { profile } = useAuth()
+  const { profile } = useAuthSafe()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,14 +68,7 @@ export default function TransactionsPage() {
       loadTransactions()
       loadCategories()
     }
-  }, [
-    profile,
-    currentPage,
-    searchTerm,
-    selectedCategory,
-    selectedType,
-    selectedMonth,
-  ])
+  }, [profile])
 
   const loadCategories = async () => {
     if (!profile) return
@@ -90,7 +85,7 @@ export default function TransactionsPage() {
       return
     }
 
-    setCategories(data || [])
+    setCategories((data ?? []).map(toCategory))
   }
 
   const loadTransactions = async () => {
@@ -133,7 +128,7 @@ export default function TransactionsPage() {
     }
 
     // 월의 마지막 날을 구하는 함수
-    const getLastDayOfMonth = (year: string, month: string) => {
+    const getLastDayOfMonth = (year: number, month: number) => {
       return new Date(year, month, 0).getDate()
     }
 
@@ -141,7 +136,10 @@ export default function TransactionsPage() {
     if (selectedMonth) {
       const year = selectedMonth.split('-')[0]
       const month = selectedMonth.split('-')[1]
-      const lastDayOfCurrentMonth = getLastDayOfMonth(year, month)
+      const lastDayOfCurrentMonth = getLastDayOfMonth(
+        Number(year),
+        Number(month)
+      )
       const startDate = `${year}-${month}-01`
       const endDate = `${year}-${month}-${lastDayOfCurrentMonth.toString().padStart(2, '0')}`
       query = query.gte('date', startDate).lte('date', endDate)
@@ -160,7 +158,7 @@ export default function TransactionsPage() {
       return
     }
 
-    setTransactions(data || [])
+    setTransactions((data ?? []).map(toTransaction))
     setTotalCount(count || 0)
     setLoading(false)
   }
@@ -178,13 +176,14 @@ export default function TransactionsPage() {
 
   const handleDeleteTransaction = async (transactionId: string) => {
     if (!confirm('이 거래를 삭제하시겠습니까?')) return
+    if (!profile?.id) return
 
     const supabase = createClient()
     const { error } = await supabase
       .from('transactions')
       .delete()
       .eq('id', transactionId)
-      .eq('user_id', profile?.id)
+      .eq('user_id', profile.id)
 
     if (error) {
       console.error('거래 삭제 오류:', error)

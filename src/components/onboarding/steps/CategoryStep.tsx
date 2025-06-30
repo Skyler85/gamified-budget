@@ -5,15 +5,7 @@ import { useOnboarding } from '@/lib/onboarding-context'
 import { useAuth } from '@/lib/auth-context'
 import { createClient } from '@/lib/supabase'
 import { Tag, Plus, X } from 'lucide-react'
-
-interface Category {
-  id?: string
-  name: string
-  color: string
-  icon: string
-  type: 'income' | 'expense'
-  is_default: boolean
-}
+import { Category } from '../../../types'
 
 export default function CategoryStep() {
   const { nextStep, prevStep, currentStep, totalSteps } = useOnboarding()
@@ -92,7 +84,7 @@ export default function CategoryStep() {
   ) => {
     if (!profile) return
 
-    const newCategory: Category = {
+    const newCategory: Omit<Category, 'id'> = {
       name: recommended.name,
       color: recommended.color,
       icon: recommended.icon,

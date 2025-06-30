@@ -58,7 +58,7 @@ export default function BudgetSettingsModal({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'total' | 'category'>('total')
-  const [categories, setCategories] = useState<any[]>([])
+  const [categories, setCategories] = useState<unknown /* TODO: replace 'any' */[]>([])
   const [categoryBudgets, setCategoryBudgets] = useState<CategoryBudget[]>([])
   const [allocatedPercentage, setAllocatedPercentage] = useState(0)
 

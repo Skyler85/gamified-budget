@@ -35,6 +35,7 @@ interface DashboardData {
     description: string | null
     type: 'income' | 'expense'
     date: string
+    created_at: string
     categories: {
       name: string
       color: string
@@ -49,7 +50,16 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { profile } = useAuth()
+  interface Profile {
+    id: string
+    full_name?: string
+    username?: string
+    monthly_budget?: number
+    saving_goal?: number
+    // Add other properties as needed
+  }
+
+  const { profile } = useAuth() as { profile: Profile | null }
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showBudgetModal, setShowBudgetModal] = useState(false)
@@ -83,7 +93,7 @@ export default function DashboardPage() {
     const supabase = createClient()
 
     // 월의 마지막 날을 구하는 함수
-    const getLastDayOfMonth = (year, month) => {
+    const getLastDayOfMonth = (year: number, month: number) => {
       return new Date(year, month, 0).getDate()
     }
 
