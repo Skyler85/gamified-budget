@@ -72,20 +72,24 @@ export default function CategoryTrendChart({
   const pieData = topCategories.map(category => ({
     name: category.name,
     value: category.total,
-    color: category.color,
+    color: category.color ?? '#cccccc',
   }))
 
   // 커스텀 툴팁
-  const CustomTooltip = ({ active, payload, label }: unknown /* TODO: replace 'any' */) => {
+  const CustomTooltip = (
+    { active, payload, label }: unknown /* TODO: replace 'any' */
+  ) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-4 border rounded-lg shadow-lg">
           <p className="font-semibold text-gray-900">{label}</p>
-          {payload.map((entry: unknown /* TODO: replace 'any' */, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {formatCurrency(entry.value)}
-            </p>
-          ))}
+          {payload.map(
+            (entry: unknown /* TODO: replace 'any' */, index: number) => (
+              <p key={index} className="text-sm" style={{ color: entry.color }}>
+                {entry.name}: {formatCurrency(entry.value)}
+              </p>
+            )
+          )}
         </div>
       )
     }
@@ -93,14 +97,16 @@ export default function CategoryTrendChart({
   }
 
   // 파이 차트 라벨
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-  }: unknown /* TODO: replace 'any' */) => {
+  const renderCustomizedLabel = (
+    {
+      cx,
+      cy,
+      midAngle,
+      innerRadius,
+      outerRadius,
+      percent,
+    }: unknown /* TODO: replace 'any' */
+  ) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5
     const x = cx + radius * Math.cos((-midAngle * Math.PI) / 180)
     const y = cy + radius * Math.sin((-midAngle * Math.PI) / 180)

@@ -35,7 +35,7 @@ const toCategory = (raw: any): Category => {
   return {
     id: raw.id,
     name: raw.name,
-    color: raw.color,
+    color: raw.color ?? '#cccccc', // 기본 색상 설정
     icon: raw.icon ?? '',
     type: raw.type as 'income' | 'expense',
     is_default: raw.is_default ?? false,

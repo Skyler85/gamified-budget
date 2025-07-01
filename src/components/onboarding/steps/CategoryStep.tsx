@@ -217,7 +217,7 @@ export default function CategoryStep() {
                 className="flex items-center space-x-1 px-3 py-1 rounded-full text-sm"
                 style={{
                   backgroundColor: category.color + '20',
-                  color: category.color,
+                  color: category.color ?? '#cccccc',
                 }}
               >
                 <span>{category.name}</span>

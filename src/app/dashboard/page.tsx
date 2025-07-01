@@ -15,6 +15,10 @@ import { PlusCircle, TrendingUp, Wallet, Target } from 'lucide-react'
 import BudgetSettingsModal from '../../components/budget/BudgetSettingsModal'
 import CategoryBudgetProgress from '@/components/dashboard/CategoryBudgetProgress'
 import BudgetAlerts from '@/components/dashboard/BudgetAlerts'
+import { Database } from '@/lib/database.types'
+
+type Transaction = Database['public']['Tables']['transactions']['Row']
+type Category = Database['public']['Tables']['categories']['Row']
 
 interface DashboardData {
   monthlyStats: {
@@ -25,28 +29,12 @@ interface DashboardData {
     expenseChange: number
   }
   categoryExpenses: Array<{
-    category: string
+    category: Category
     amount: number
     color: string
   }>
-  recentTransactions: Array<{
-    id: string
-    amount: number
-    description: string | null
-    type: 'income' | 'expense'
-    date: string
-    created_at: string
-    categories: {
-      name: string
-      color: string
-    }
-  }>
-  categories: Array<{
-    id: string
-    name: string
-    color: string
-    type: 'income' | 'expense'
-  }>
+  recentTransactions: Transaction[]
+  categories: Category[]
 }
 
 export default function DashboardPage() {
@@ -200,7 +188,7 @@ export default function DashboardPage() {
             return {
               category: cat.name,
               amount,
-              color: cat.color,
+              color: cat.color ?? '#cccccc', // 기본 색상 설정
             }
           })
           .filter(cat => cat.amount > 0)

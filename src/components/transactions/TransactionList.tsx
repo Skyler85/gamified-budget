@@ -163,7 +163,7 @@ export default function TransactionList({
                           style={{
                             backgroundColor:
                               transaction.categories.color + '20',
-                            color: transaction.categories.color,
+                            color: transaction.categories.color ?? '#cccccc',
                           }}
                         >
                           <Tag className="h-3 w-3 mr-1" />

@@ -111,7 +111,7 @@ export default function RecentTransactions({
                       className="text-xs px-2 py-0.5 rounded-full"
                       style={{
                         backgroundColor: transaction.categories.color + '20',
-                        color: transaction.categories.color,
+                        color: transaction.categories.color ?? '#cccccc',
                       }}
                     >
                       {transaction.categories.name}

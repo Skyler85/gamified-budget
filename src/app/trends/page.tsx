@@ -170,7 +170,7 @@ export default function TrendsPage() {
 
     transactions?.forEach((transaction: Transaction) => {
       const categoryName = transaction.categories?.name || '미분류'
-      const categoryColor = transaction.categories?.color || '#666666'
+      const categoryColor = transaction.categories?.color || '##cccccc'
       const month = new Date(transaction.date).getMonth()
 
       if (!categoryMap.has(categoryName)) {
